@@ -1,0 +1,3716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big West Championships Tracker</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#141414;--elevated:#1e1e1e;
+  --border:rgba(255,255,255,0.07);
+  --accent:#00e676;--accent-glow:rgba(0,230,118,0.2);--accent-dim:#00b04f;
+  --gold:#ffd700;--silver:#c0c0c0;--bronze:#cd7f32;
+  --text:#f5f5f7;--text-2:#a1a1a6;--text-3:#48484a;
+  --r:16px;--r-sm:10px;--ease:cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.5;overflow-x:hidden;min-height:100vh}
+
+/* ── particles ── */
+.particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.pt{position:absolute;border-radius:50%;background:var(--accent);opacity:0;animation:float-pt linear infinite}
+@keyframes float-pt{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:.12}90%{opacity:.04}100%{transform:translateY(-20vh) scale(1);opacity:0}}
+
+/* ── layout ── */
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px 80px}
+
+/* ── hero ── */
+.hero{text-align:center;padding:72px 0 52px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;animation:fade-up .6s ease both}
+.hero-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;background:linear-gradient(135deg,#fff 0%,var(--accent) 55%,#00b04f 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;animation:fade-up .6s .1s ease both}
+.hero-sub{color:var(--text-2);font-size:1.05rem;animation:fade-up .6s .2s ease both}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── toggle ── */
+.toggle-wrap{display:flex;justify-content:center;margin-bottom:44px;animation:fade-up .6s .3s ease both}
+.pills{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:4px;gap:2px;position:relative}
+.pill{position:relative;z-index:1;padding:8px 26px;border-radius:100px;border:none;background:transparent;color:var(--text-2);font-size:14px;font-weight:500;cursor:pointer;transition:color .25s var(--ease);font-family:inherit}
+.pill.active{color:var(--bg)}
+.pill-bg{position:absolute;top:4px;left:4px;height:calc(100% - 8px);background:var(--accent);border-radius:100px;transition:left .3s var(--ease),width .3s var(--ease);box-shadow:0 0 20px var(--accent-glow);z-index:0}
+
+/* ── section heading ── */
+.sec-title{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── leaderboard ── */
+.lb-section{margin-bottom:56px}
+.lb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.lb-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease);opacity:0;position:relative;overflow:hidden}
+.lb-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--accent-glow),transparent 60%);opacity:0;transition:opacity .3s var(--ease)}
+.lb-card:hover{transform:translateY(-2px);border-color:rgba(0,230,118,.3);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.lb-card:hover::before{opacity:1}
+.lb-card.active{border-color:var(--accent)!important;box-shadow:0 0 0 1px var(--accent),0 0 28px var(--accent-glow)!important}
+.lb-card.anim{animation:slide-left .45s ease both}
+@keyframes slide-left{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+.lb-rank{font-size:1rem;font-weight:800;width:26px;text-align:center;flex-shrink:0;color:var(--text-3)}
+.lb-medal{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0;animation:shimmer 3s ease-in-out infinite}
+@keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5) drop-shadow(0 0 6px currentColor)}}
+.lb-avatar{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.02em;color:#fff;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.lb-info{flex:1;min-width:0}
+.lb-school{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-pts-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+.lb-score{font-size:1.6rem;font-weight:800;letter-spacing:-.03em;color:var(--accent);text-align:right;min-width:44px;font-variant-numeric:tabular-nums}
+.lb-score.big{font-size:2rem}
+
+/* ── chips ── */
+.chips-wrap{margin-bottom:28px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:7px 16px;border-radius:100px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;transition:all .25s var(--ease);font-family:inherit}
+.chip:hover{border-color:rgba(0,230,118,.3);color:var(--text)}
+.chip.active{background:rgba(0,230,118,.12);border-color:var(--accent);color:var(--accent)}
+
+/* ── events grid ── */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.ev-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:transform .3s var(--ease),border-color .3s var(--ease),box-shadow .3s var(--ease);opacity:0;transform:translateY(18px)}
+.ev-card:hover{transform:translateY(-2px);border-color:rgba(0,230,118,.2);box-shadow:0 10px 36px rgba(0,0,0,.35)}
+.ev-card.vis{animation:ev-in .4s ease both}
+@keyframes ev-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ev-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .25s,background .25s}
+.ev-card.open .ev-head{border-bottom-color:var(--border);background:rgba(0,230,118,.04)}
+.ev-name-wrap{display:flex;align-items:center;gap:9px}
+.g-badge{font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:6px;text-transform:uppercase}
+.g-m{background:rgba(100,160,255,.15);color:#64a0ff}
+.g-f{background:rgba(255,100,160,.15);color:#ff64a0}
+.ev-name{font-weight:600;font-size:.92rem}
+.ev-cat{font-size:11px;color:var(--text-3);font-weight:500}
+.ev-chevron{color:var(--text-3);transition:transform .25s var(--ease);font-size:11px}
+.ev-card.open .ev-chevron{transform:rotate(180deg)}
+
+/* ── preview rows ── */
+.ev-preview{padding:2px 18px 14px}
+.prev-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.prev-row:last-child{border-bottom:none}
+.prev-rk{width:18px;text-align:center;font-size:11px;font-weight:700;color:var(--text-3);flex-shrink:0}
+.prev-name{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prev-school{color:var(--text-2);font-size:12px;white-space:nowrap;flex-shrink:0}
+.prev-mark{font-weight:600;font-variant-numeric:tabular-nums;font-size:13px;min-width:58px;text-align:right;flex-shrink:0}
+.prev-pts{background:rgba(0,230,118,.12);color:var(--accent);font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;min-width:26px;text-align:center;flex-shrink:0}
+
+/* ── full table ── */
+.ev-tbl-wrap{display:none;padding:0 18px 16px}
+.ev-card.open .ev-tbl-wrap{display:block}
+table.rt{width:100%;border-collapse:collapse;font-size:13px}
+table.rt th{text-align:left;color:var(--text-3);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--border)}
+table.rt td{padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+table.rt tr:last-child td{border-bottom:none}
+table.rt tr:hover td{background:rgba(255,255,255,.02)}
+.pts-cell{background:rgba(0,230,118,.1);color:var(--accent);font-weight:700;border-radius:6px;padding:3px 8px!important;text-align:center}
+
+/* ── empty state ── */
+.empty{text-align:center;padding:60px 20px;color:var(--text-3);grid-column:1/-1}
+.empty .icon{font-size:2.5rem;margin-bottom:14px}
+
+/* ── footer ── */
+footer{text-align:center;padding:32px 24px;color:var(--text-3);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--accent-dim);text-decoration:none}
+footer a:hover{color:var(--accent)}
+
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--elevated);border-radius:4px}
+.dimmed{opacity:.3}
+</style>
+</head>
+<body>
+<div class="particles" id="pts"></div>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-badge">2026 Outdoor Season</div>
+    <h1>Big West Championships<br>Tracker</h1>
+    <p class="hero-sub">Projected scores based on season-best performances &mdash; 10-8-6-5-4-3-2-1 scoring</p>
+  </header>
+
+  <div class="toggle-wrap">
+    <div class="pills" id="pills">
+      <div class="pill-bg" id="pillBg"></div>
+      <button class="pill active" data-g="combined">Combined</button>
+      <button class="pill" data-g="men">Men&rsquo;s</button>
+      <button class="pill" data-g="women">Women&rsquo;s</button>
+    </div>
+  </div>
+
+  <section class="lb-section">
+    <h2 class="sec-title">Team Standings</h2>
+    <div class="lb-grid" id="lbGrid"></div>
+  </section>
+
+  <div class="chips-wrap">
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <section>
+    <h2 class="sec-title">Event Results</h2>
+    <div class="ev-grid" id="evGrid"></div>
+  </section>
+</div>
+
+<footer>
+  Data sourced from <a href="https://www.tfrrs.org/lists/5660/Big_West_Outdoor_Performance_List" target="_blank">TFRRS Big West Outdoor Performance List</a>
+  &middot; Scoring: 10-8-6-5-4-3-2-1 top 8 finishers &middot; Projections only
+</footer>
+
+<script>
+const DATA = {
+  "team_scores": {
+    "combined": [
+      {
+        "school": "Cal Poly",
+        "points": 268
+      },
+      {
+        "school": "UC Irvine",
+        "points": 262
+      },
+      {
+        "school": "Cal St. Fullerton",
+        "points": 223
+      },
+      {
+        "school": "Long Beach St.",
+        "points": 180
+      },
+      {
+        "school": "UC San Diego",
+        "points": 175
+      },
+      {
+        "school": "UC Santa Barbara",
+        "points": 162
+      },
+      {
+        "school": "CSUN",
+        "points": 118
+      },
+      {
+        "school": "UC Riverside",
+        "points": 72
+      },
+      {
+        "school": "UC Davis",
+        "points": 65
+      },
+      {
+        "school": "Hawaii",
+        "points": 47
+      },
+      {
+        "school": "CSU Bakersfield",
+        "points": 38
+      }
+    ],
+    "men": [
+      {
+        "school": "Cal Poly",
+        "points": 157
+      },
+      {
+        "school": "Long Beach St.",
+        "points": 122
+      },
+      {
+        "school": "Cal St. Fullerton",
+        "points": 114
+      },
+      {
+        "school": "UC Irvine",
+        "points": 87
+      },
+      {
+        "school": "UC San Diego",
+        "points": 81
+      },
+      {
+        "school": "UC Santa Barbara",
+        "points": 75
+      },
+      {
+        "school": "CSUN",
+        "points": 70
+      },
+      {
+        "school": "UC Riverside",
+        "points": 34
+      },
+      {
+        "school": "UC Davis",
+        "points": 33
+      },
+      {
+        "school": "CSU Bakersfield",
+        "points": 24
+      },
+      {
+        "school": "Hawaii",
+        "points": 0
+      }
+    ],
+    "women": [
+      {
+        "school": "UC Irvine",
+        "points": 175
+      },
+      {
+        "school": "Cal Poly",
+        "points": 111
+      },
+      {
+        "school": "Cal St. Fullerton",
+        "points": 109
+      },
+      {
+        "school": "UC San Diego",
+        "points": 94
+      },
+      {
+        "school": "UC Santa Barbara",
+        "points": 87
+      },
+      {
+        "school": "Long Beach St.",
+        "points": 58
+      },
+      {
+        "school": "CSUN",
+        "points": 48
+      },
+      {
+        "school": "Hawaii",
+        "points": 47
+      },
+      {
+        "school": "UC Riverside",
+        "points": 38
+      },
+      {
+        "school": "UC Davis",
+        "points": 32
+      },
+      {
+        "school": "CSU Bakersfield",
+        "points": 14
+      }
+    ]
+  },
+  "events": {
+    "Men 100m": {
+      "short_name": "100m",
+      "gender": "men",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Abel Jordan",
+          "school": "Cal St. Fullerton",
+          "mark": "10.12",
+          "year": "SR-4",
+          "wind": "1.6",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Trey Sheron",
+          "school": "Long Beach St.",
+          "mark": "10.31",
+          "year": "SO-2",
+          "wind": "1.0",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Tristyn Flores",
+          "school": "Long Beach St.",
+          "mark": "10.35",
+          "year": "SR-4",
+          "wind": "-0.1",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Matthew Staples",
+          "school": "UC Santa Barbara",
+          "mark": "10.40",
+          "year": "SR-4",
+          "wind": "1.0",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Justin Johnson",
+          "school": "UC Irvine",
+          "mark": "10.42",
+          "year": "SO-2",
+          "wind": "2.5",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "James Crawford",
+          "school": "CSUN",
+          "mark": "10.45",
+          "year": "JR-3",
+          "wind": "0.2",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Dominic Gates",
+          "school": "Cal St. Fullerton",
+          "mark": "10.47",
+          "year": "SR-4",
+          "wind": "3.4",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Brandon Orlow",
+          "school": "UC San Diego",
+          "mark": "10.48",
+          "year": "JR-3",
+          "wind": "+0.0",
+          "points": 1
+        }
+      ]
+    },
+    "Women 100m": {
+      "short_name": "100m",
+      "gender": "women",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Trinity Barnett",
+          "school": "Long Beach St.",
+          "mark": "11.47",
+          "year": "SR-4",
+          "wind": "1.0",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Mia Shepard",
+          "school": "UC Santa Barbara",
+          "mark": "11.58",
+          "year": "SO-2",
+          "wind": "0.9",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Samantha Bartz",
+          "school": "UC Irvine",
+          "mark": "11.60",
+          "year": "SR-4",
+          "wind": "0.6",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Hallena Sutherland",
+          "school": "UC Irvine",
+          "mark": "11.61",
+          "year": "JR-3",
+          "wind": "1.6",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Makiah Parker",
+          "school": "CSU Bakersfield",
+          "mark": "11.62",
+          "year": "SO-2",
+          "wind": "+0.0",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Jahzara Davis",
+          "school": "Cal St. Fullerton",
+          "mark": "11.62",
+          "year": "SR-4",
+          "wind": "1.9",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Raykiyat Olukoju",
+          "school": "UC Riverside",
+          "mark": "11.63",
+          "year": "SR-4",
+          "wind": "1.6",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Parker Halgren",
+          "school": "UC Santa Barbara",
+          "mark": "11.64",
+          "year": "SO-2",
+          "wind": "1.9",
+          "points": 1
+        }
+      ]
+    },
+    "Men 200m": {
+      "short_name": "200m",
+      "gender": "men",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Tristyn Flores",
+          "school": "Long Beach St.",
+          "mark": "20.73",
+          "year": "SR-4",
+          "wind": "1.2",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Justin Johnson",
+          "school": "UC Irvine",
+          "mark": "20.78",
+          "year": "SO-2",
+          "wind": "1.2",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Matthew Staples",
+          "school": "UC Santa Barbara",
+          "mark": "20.82",
+          "year": "SR-4",
+          "wind": "1.2",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Trey Sheron",
+          "school": "Long Beach St.",
+          "mark": "20.93",
+          "year": "SO-2",
+          "wind": "0.4",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Isaiah Emerson",
+          "school": "Cal St. Fullerton",
+          "mark": "21.00",
+          "year": "SR-4",
+          "wind": "1.2",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "James Crawford",
+          "school": "CSUN",
+          "mark": "21.00",
+          "year": "JR-3",
+          "wind": "0.5",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Antrell Harris",
+          "school": "UC San Diego",
+          "mark": "21.09",
+          "year": "FR-1",
+          "wind": "0.5",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Jacoby Madise",
+          "school": "UC Riverside",
+          "mark": "21.14",
+          "year": "JR-3",
+          "wind": "-0.6",
+          "points": 1
+        }
+      ]
+    },
+    "Women 200m": {
+      "short_name": "200m",
+      "gender": "women",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Raykiyat Olukoju",
+          "school": "UC Riverside",
+          "mark": "23.39",
+          "year": "SR-4",
+          "wind": "1.5",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Catalina Teran",
+          "school": "UC Irvine",
+          "mark": "23.61",
+          "year": "JR-3",
+          "wind": "1.4",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Trinity Barnett",
+          "school": "Long Beach St.",
+          "mark": "23.72",
+          "year": "SR-4",
+          "wind": "1.7",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Nancy Dematte",
+          "school": "Cal St. Fullerton",
+          "mark": "23.79",
+          "year": "JR-3",
+          "wind": "1.1",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Makiah Parker",
+          "school": "CSU Bakersfield",
+          "mark": "23.84",
+          "year": "SO-2",
+          "wind": "2.8",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Madison Easter",
+          "school": "Cal Poly",
+          "mark": "23.87",
+          "year": "SO-2",
+          "wind": "2.8",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Hallena Sutherland",
+          "school": "UC Irvine",
+          "mark": "23.89",
+          "year": "JR-3",
+          "wind": "0.5",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Ava Simos",
+          "school": "Cal Poly",
+          "mark": "23.89",
+          "year": "SO-2",
+          "wind": "1.0",
+          "points": 1
+        }
+      ]
+    },
+    "Men 400m": {
+      "short_name": "400m",
+      "gender": "men",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Tibyasa Matovu Jr.",
+          "school": "CSUN",
+          "mark": "46.30",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Mattheo Lacasia",
+          "school": "UC Santa Barbara",
+          "mark": "46.47",
+          "year": "FR-1",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Walter Pierce",
+          "school": "CSUN",
+          "mark": "46.70",
+          "year": "SO-2",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Rider Cooper",
+          "school": "Cal St. Fullerton",
+          "mark": "46.92",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Vincent Jones",
+          "school": "Long Beach St.",
+          "mark": "47.03",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Adren Parker",
+          "school": "Long Beach St.",
+          "mark": "47.07",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Brendan Clark",
+          "school": "UC Irvine",
+          "mark": "47.33",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Ian Dossman",
+          "school": "Cal St. Fullerton",
+          "mark": "47.38",
+          "year": "JR-3",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 400m": {
+      "short_name": "400m",
+      "gender": "women",
+      "category": "Sprints",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Nancy Dematte",
+          "school": "Cal St. Fullerton",
+          "mark": "53.22",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Arionn Livingston",
+          "school": "Cal St. Fullerton",
+          "mark": "53.91",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Mercy Ehiemere",
+          "school": "UC Riverside",
+          "mark": "54.03",
+          "year": "SO-2",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Aoife Hernon",
+          "school": "UC Irvine",
+          "mark": "54.05",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Jordan Jackson",
+          "school": "Cal Poly",
+          "mark": "54.46",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Maya Shinnick",
+          "school": "UC Davis",
+          "mark": "54.49",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Izzy Kneeshaw",
+          "school": "Hawaii",
+          "mark": "54.64",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Eden Enoru",
+          "school": "UC San Diego",
+          "mark": "54.82",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 800m": {
+      "short_name": "800m",
+      "gender": "men",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Aidan McCarthy",
+          "school": "Cal Poly",
+          "mark": "1:47.51",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Carson Smith",
+          "school": "Cal Poly",
+          "mark": "1:47.65",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Cameron Rhone",
+          "school": "Long Beach St.",
+          "mark": "1:50.03",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Jeffrey Overgaard",
+          "school": "Cal Poly",
+          "mark": "1:50.41",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Adam Divinity",
+          "school": "CSUN",
+          "mark": "1:50.51",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Taj Clark",
+          "school": "Cal Poly",
+          "mark": "1:50.67",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Evan Gardner",
+          "school": "UC San Diego",
+          "mark": "1:50.78",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Ian Hansen",
+          "school": "UC San Diego",
+          "mark": "1:51.25",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 800m": {
+      "short_name": "800m",
+      "gender": "women",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Natalyn Membreno",
+          "school": "Cal St. Fullerton",
+          "mark": "2:06.22",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Allyson Abandonato",
+          "school": "UC San Diego",
+          "mark": "2:06.68",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Emma Hadley",
+          "school": "UC Irvine",
+          "mark": "2:07.73",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Ashlynn Viramontes",
+          "school": "Cal St. Fullerton",
+          "mark": "2:08.29",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Jordan Jackson",
+          "school": "Cal Poly",
+          "mark": "2:08.52",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Ella Echsner",
+          "school": "Cal Poly",
+          "mark": "2:08.60",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Kaia Schmidt",
+          "school": "UC Irvine",
+          "mark": "2:09.14",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Izzy Gorton",
+          "school": "Hawaii",
+          "mark": "2:09.25",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 1500m": {
+      "short_name": "1500m",
+      "gender": "men",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Aidan McCarthy",
+          "school": "Cal Poly",
+          "mark": "3:39.94",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Carson Smith",
+          "school": "Cal Poly",
+          "mark": "3:41.93",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Miles Jones",
+          "school": "Long Beach St.",
+          "mark": "3:42.97",
+          "year": "FR-1",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Jacob Yagers",
+          "school": "CSU Bakersfield",
+          "mark": "3:44.24",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Tyler Daillak",
+          "school": "Cal Poly",
+          "mark": "3:45.41",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Nathan Garderes",
+          "school": "UC San Diego",
+          "mark": "3:47.19",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Liam Miller",
+          "school": "Cal Poly",
+          "mark": "3:48.04",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Joseph Vargas",
+          "school": "UC San Diego",
+          "mark": "3:48.27",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 1500m": {
+      "short_name": "1500m",
+      "gender": "women",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Sylvana Northrop",
+          "school": "UC San Diego",
+          "mark": "4:20.69",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Emma Hadley",
+          "school": "UC Irvine",
+          "mark": "4:22.34",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Natalyn Membreno",
+          "school": "Cal St. Fullerton",
+          "mark": "4:25.27",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Isabella Smith",
+          "school": "Cal St. Fullerton",
+          "mark": "4:26.43",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Dasha LeFaivre",
+          "school": "UC San Diego",
+          "mark": "4:28.24",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Allyson Abandonato",
+          "school": "UC San Diego",
+          "mark": "4:29.91",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Morgan Nygren",
+          "school": "UC Riverside",
+          "mark": "4:30.12",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Christel Elkins",
+          "school": "UC San Diego",
+          "mark": "4:30.59",
+          "year": "JR-3",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 5000m": {
+      "short_name": "5000m",
+      "gender": "men",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Liam Miller",
+          "school": "Cal Poly",
+          "mark": "13:56.85",
+          "year": "FR-1",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Tyler Daillak",
+          "school": "Cal Poly",
+          "mark": "14:06.83",
+          "year": "FR-1",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Juan Chantaca",
+          "school": "UC Irvine",
+          "mark": "14:11.77",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Dheeraj Gurusamy",
+          "school": "Cal Poly",
+          "mark": "14:14.52",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Michael Chambers",
+          "school": "Cal Poly",
+          "mark": "14:17.71",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Rory Catsimanes",
+          "school": "Cal Poly",
+          "mark": "14:22.58",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Fransico Felix",
+          "school": "CSU Bakersfield",
+          "mark": "14:23.61",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Micah Sanchez",
+          "school": "Cal Poly",
+          "mark": "14:25.49",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 5000m": {
+      "short_name": "5000m",
+      "gender": "women",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Sylvana Northrop",
+          "school": "UC San Diego",
+          "mark": "16:15.69",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Renae Searls",
+          "school": "Cal Poly",
+          "mark": "16:46.53",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Addie Oversmith",
+          "school": "UC Santa Barbara",
+          "mark": "16:46.60",
+          "year": "FR-1",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Ashlyn Leath",
+          "school": "Cal Poly",
+          "mark": "16:52.12",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Christel Elkins",
+          "school": "UC San Diego",
+          "mark": "17:01.81",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Allyson Abandonato",
+          "school": "UC San Diego",
+          "mark": "17:06.22",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Liana Lee",
+          "school": "UC Irvine",
+          "mark": "17:14.57",
+          "year": "SO-2",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Dasha LeFaivre",
+          "school": "UC San Diego",
+          "mark": "17:19.00",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 10000m": {
+      "short_name": "10000m",
+      "gender": "men",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Ethan Brooks",
+          "school": "UC Davis",
+          "mark": "30:01.12",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Chance Tokubo",
+          "school": "UC Davis",
+          "mark": "32:26.10",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        }
+      ]
+    },
+    "Women 10000m": {
+      "short_name": "10000m",
+      "gender": "women",
+      "category": "Distance",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Stormy Wallace",
+          "school": "UC Davis",
+          "mark": "35:31.53",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Brooke Butler",
+          "school": "UC Davis",
+          "mark": "36:30.08",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Brianna Torres",
+          "school": "CSUN",
+          "mark": "37:02.87",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Nadia Munoz",
+          "school": "CSUN",
+          "mark": "37:37.76",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Michelle Huerta",
+          "school": "UC San Diego",
+          "mark": "38:05.11",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        }
+      ]
+    },
+    "Men 110mH": {
+      "short_name": "110mH",
+      "gender": "men",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Abel Jordan",
+          "school": "Cal St. Fullerton",
+          "mark": "13.86",
+          "year": "SR-4",
+          "wind": "1.1",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Logan Lyght",
+          "school": "UC Irvine",
+          "mark": "13.96",
+          "year": "JR-3",
+          "wind": "0.5",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Pyrce Edwards",
+          "school": "UC Santa Barbara",
+          "mark": "14.09",
+          "year": "JR-3",
+          "wind": "-0.5",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Cameron Simmons",
+          "school": "Long Beach St.",
+          "mark": "14.14",
+          "year": "FR-1",
+          "wind": "1.1",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Terrance Whaley",
+          "school": "Long Beach St.",
+          "mark": "14.19",
+          "year": "FR-1",
+          "wind": "0.5",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "AJ Taylor",
+          "school": "UC Irvine",
+          "mark": "14.37",
+          "year": "SR-4",
+          "wind": "-0.3",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Maxwell Jefferson",
+          "school": "UC Riverside",
+          "mark": "14.49",
+          "year": "SR-4",
+          "wind": "0.9",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Ryan Gregory",
+          "school": "Long Beach St.",
+          "mark": "14.49",
+          "year": "SR-4",
+          "wind": "0.8",
+          "points": 1
+        }
+      ]
+    },
+    "Women 100mH": {
+      "short_name": "100mH",
+      "gender": "women",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Jahzara Davis",
+          "school": "Cal St. Fullerton",
+          "mark": "13.37",
+          "year": "SR-4",
+          "wind": "1.3",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Jazzmine Davis",
+          "school": "UC Irvine",
+          "mark": "13.40",
+          "year": "SR-4",
+          "wind": "1.4",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Kadidja Sangare",
+          "school": "UC Davis",
+          "mark": "13.73",
+          "year": "SR-4",
+          "wind": "3.7",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Mayalee Osola",
+          "school": "Cal St. Fullerton",
+          "mark": "13.84",
+          "year": "SO-2",
+          "wind": "0.3",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Robyn Larkan",
+          "school": "Hawaii",
+          "mark": "13.85",
+          "year": "JR-3",
+          "wind": "0.3",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Emilia Mandela",
+          "school": "CSU Bakersfield",
+          "mark": "13.87",
+          "year": "SO-2",
+          "wind": "-0.2",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Maddie Conte",
+          "school": "UC Santa Barbara",
+          "mark": "13.88",
+          "year": "JR-3",
+          "wind": "0.2",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Jessica Mackenzie",
+          "school": "UC Santa Barbara",
+          "mark": "13.88",
+          "year": "SR-4",
+          "wind": "2.6",
+          "points": 1
+        }
+      ]
+    },
+    "Men 400mH": {
+      "short_name": "400mH",
+      "gender": "men",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Finn Andrews",
+          "school": "UC Santa Barbara",
+          "mark": "50.37",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Mac Lamkin",
+          "school": "UC Santa Barbara",
+          "mark": "51.27",
+          "year": "FR-1",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Vincent Atilano",
+          "school": "Cal Poly",
+          "mark": "51.34",
+          "year": "SO-2",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Roman Mendoza",
+          "school": "UC Irvine",
+          "mark": "53.21",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Arthur Celestine Jr",
+          "school": "UC Riverside",
+          "mark": "53.63",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Ashita Kazama",
+          "school": "UC San Diego",
+          "mark": "53.76",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Jaden Dasher",
+          "school": "Long Beach St.",
+          "mark": "53.88",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Bradley Riehl",
+          "school": "Cal St. Fullerton",
+          "mark": "53.89",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 400mH": {
+      "short_name": "400mH",
+      "gender": "women",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Esmeray Demirbas",
+          "school": "UC Irvine",
+          "mark": "58.73",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Alyssa Heinlein",
+          "school": "Cal St. Fullerton",
+          "mark": "59.17",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Maddie Conte",
+          "school": "UC Santa Barbara",
+          "mark": "59.59",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Zamaria Mack",
+          "school": "Long Beach St.",
+          "mark": "1:00.09",
+          "year": "FR-1",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Bella Turner",
+          "school": "Cal St. Fullerton",
+          "mark": "1:00.39",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Kalia Estes",
+          "school": "Cal Poly",
+          "mark": "1:00.90",
+          "year": "JR-3",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Sarah Ajayi",
+          "school": "UC Irvine",
+          "mark": "1:00.91",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Lisa Martensson",
+          "school": "Hawaii",
+          "mark": "1:01.18",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 3000mSC": {
+      "short_name": "3000mSC",
+      "gender": "men",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Joshua Schuld",
+          "school": "UC Irvine",
+          "mark": "9:16.56",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Baptiste Garderes",
+          "school": "UC Riverside",
+          "mark": "9:18.69",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Ramiro Mateos",
+          "school": "CSUN",
+          "mark": "9:26.55",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Cameron Gill",
+          "school": "Long Beach St.",
+          "mark": "9:29.96",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Tate Meaux",
+          "school": "UC San Diego",
+          "mark": "9:30.44",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Diego Rodriguez",
+          "school": "CSUN",
+          "mark": "9:30.98",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Camden Luecht",
+          "school": "UC Santa Barbara",
+          "mark": "9:33.97",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Samuel Berhane",
+          "school": "Cal St. Fullerton",
+          "mark": "9:39.24",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 3000mSC": {
+      "short_name": "3000mSC",
+      "gender": "women",
+      "category": "Hurdles",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Kaia Schmidt",
+          "school": "UC Irvine",
+          "mark": "10:16.88",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Emma Dunmire",
+          "school": "UC San Diego",
+          "mark": "10:33.05",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Isabel Sanchez",
+          "school": "Cal Poly",
+          "mark": "10:36.04",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Renae Searls",
+          "school": "Cal Poly",
+          "mark": "10:46.80",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Ryann Strawn",
+          "school": "UC Santa Barbara",
+          "mark": "10:48.18",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Sydney Sundgren",
+          "school": "Cal Poly",
+          "mark": "10:51.13",
+          "year": "JR-3",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Anna Soares",
+          "school": "UC Irvine",
+          "mark": "10:51.54",
+          "year": "SO-2",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Lilit Arakelyan",
+          "school": "CSUN",
+          "mark": "10:52.25",
+          "year": "JR-3",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 4x100m": {
+      "short_name": "4x100m",
+      "gender": "men",
+      "category": "Relays",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Cal St. Fullerton",
+          "school": "Cal St. Fullerton",
+          "mark": "39.08",
+          "year": "",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Long Beach St.",
+          "school": "Long Beach St.",
+          "mark": "39.52",
+          "year": "",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "UC Irvine",
+          "school": "UC Irvine",
+          "mark": "39.84",
+          "year": "",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "UC San Diego",
+          "school": "UC San Diego",
+          "mark": "40.21",
+          "year": "",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "UC Santa Barbara",
+          "school": "UC Santa Barbara",
+          "mark": "40.47",
+          "year": "",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "UC Davis",
+          "school": "UC Davis",
+          "mark": "41.10",
+          "year": "",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "CSU Bakersfield",
+          "school": "CSU Bakersfield",
+          "mark": "41.60",
+          "year": "",
+          "wind": null,
+          "points": 2
+        }
+      ]
+    },
+    "Women 4x100m": {
+      "short_name": "4x100m",
+      "gender": "women",
+      "category": "Relays",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Cal St. Fullerton",
+          "school": "Cal St. Fullerton",
+          "mark": "44.77",
+          "year": "",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "UC Irvine",
+          "school": "UC Irvine",
+          "mark": "44.82",
+          "year": "",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Cal Poly",
+          "school": "Cal Poly",
+          "mark": "44.89",
+          "year": "",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "UC Riverside",
+          "school": "UC Riverside",
+          "mark": "44.95",
+          "year": "",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "CSUN",
+          "school": "CSUN",
+          "mark": "45.43",
+          "year": "",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "CSU Bakersfield",
+          "school": "CSU Bakersfield",
+          "mark": "45.44",
+          "year": "",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Long Beach St.",
+          "school": "Long Beach St.",
+          "mark": "45.52",
+          "year": "",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "UC Santa Barbara",
+          "school": "UC Santa Barbara",
+          "mark": "45.72",
+          "year": "",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men 4x400m": {
+      "short_name": "4x400m",
+      "gender": "men",
+      "category": "Relays",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Cal St. Fullerton",
+          "school": "Cal St. Fullerton",
+          "mark": "3:06.85",
+          "year": "",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Long Beach St.",
+          "school": "Long Beach St.",
+          "mark": "3:10.66",
+          "year": "",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "UC Santa Barbara",
+          "school": "UC Santa Barbara",
+          "mark": "3:10.75",
+          "year": "",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Cal Poly",
+          "school": "Cal Poly",
+          "mark": "3:12.36",
+          "year": "",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "UC Irvine",
+          "school": "UC Irvine",
+          "mark": "3:14.21",
+          "year": "",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "UC San Diego",
+          "school": "UC San Diego",
+          "mark": "3:14.95",
+          "year": "",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "UC Riverside",
+          "school": "UC Riverside",
+          "mark": "3:17.44",
+          "year": "",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "UC Davis",
+          "school": "UC Davis",
+          "mark": "3:19.95",
+          "year": "",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women 4x400m": {
+      "short_name": "4x400m",
+      "gender": "women",
+      "category": "Relays",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Cal St. Fullerton",
+          "school": "Cal St. Fullerton",
+          "mark": "3:39.04",
+          "year": "",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "UC San Diego",
+          "school": "UC San Diego",
+          "mark": "3:40.80",
+          "year": "",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "UC Irvine",
+          "school": "UC Irvine",
+          "mark": "3:40.83",
+          "year": "",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Hawaii",
+          "school": "Hawaii",
+          "mark": "3:41.13",
+          "year": "",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Cal Poly",
+          "school": "Cal Poly",
+          "mark": "3:41.40",
+          "year": "",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "UC Santa Barbara",
+          "school": "UC Santa Barbara",
+          "mark": "3:41.79",
+          "year": "",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "UC Riverside",
+          "school": "UC Riverside",
+          "mark": "3:42.11",
+          "year": "",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "CSUN",
+          "school": "CSUN",
+          "mark": "3:42.93",
+          "year": "",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men HJ": {
+      "short_name": "HJ",
+      "gender": "men",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Miles Bennett",
+          "school": "UC San Diego",
+          "mark": "2.16m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Sebastian Ikolo",
+          "school": "Cal St. Fullerton",
+          "mark": "2.15m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Porter Gibbs",
+          "school": "UC San Diego",
+          "mark": "2.05m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Nathan Fifer",
+          "school": "Cal Poly",
+          "mark": "2.05m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Keith Orona",
+          "school": "Cal St. Fullerton",
+          "mark": "2.02m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Alan Vuong",
+          "school": "UC Irvine",
+          "mark": "2.01m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Gabriel Ikolo",
+          "school": "Cal St. Fullerton",
+          "mark": "2.01m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Matthew Browner",
+          "school": "CSUN",
+          "mark": "2.00m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women HJ": {
+      "short_name": "HJ",
+      "gender": "women",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Lilian Turban",
+          "school": "Hawaii",
+          "mark": "1.80m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Allison Tito",
+          "school": "UC Santa Barbara",
+          "mark": "1.78m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Zharia Taylor",
+          "school": "UC Irvine",
+          "mark": "1.77m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Grace Proudfoot",
+          "school": "Cal Poly",
+          "mark": "1.75m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Charli Kennedy",
+          "school": "Cal Poly",
+          "mark": "1.75m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Joy Anderson",
+          "school": "UC Irvine",
+          "mark": "1.73m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Layanna Green",
+          "school": "UC Santa Barbara",
+          "mark": "1.73m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Makena Bailey",
+          "school": "UC San Diego",
+          "mark": "1.73m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men PV": {
+      "short_name": "PV",
+      "gender": "men",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Ben Feyrer",
+          "school": "Cal Poly",
+          "mark": "5.41m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Caleb King",
+          "school": "Cal Poly",
+          "mark": "5.21m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Vicentejordan Vanderlipe",
+          "school": "Long Beach St.",
+          "mark": "5.20m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Aidan Hagerty",
+          "school": "UC Davis",
+          "mark": "5.19m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Ethan Nuttall",
+          "school": "UC Santa Barbara",
+          "mark": "4.98m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Cyprus Rice",
+          "school": "Long Beach St.",
+          "mark": "4.98m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Jake Reed",
+          "school": "UC Irvine",
+          "mark": "4.90m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Jarod Nunnemaker",
+          "school": "UC Santa Barbara",
+          "mark": "4.90m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women PV": {
+      "short_name": "PV",
+      "gender": "women",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Lexi Evans",
+          "school": "Cal Poly",
+          "mark": "4.26m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Astrid Teran",
+          "school": "Cal Poly",
+          "mark": "4.16m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Jonelle Scott",
+          "school": "Long Beach St.",
+          "mark": "4.05m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Alana Sugue",
+          "school": "UC Irvine",
+          "mark": "4.01m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Isabella Di Silvestri",
+          "school": "UC San Diego",
+          "mark": "3.88m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Lindsey Koch",
+          "school": "Hawaii",
+          "mark": "3.82m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Ava Enriquez",
+          "school": "Hawaii",
+          "mark": "3.81m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Sydni Harden",
+          "school": "UC Santa Barbara",
+          "mark": "3.80m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men LJ": {
+      "short_name": "LJ",
+      "gender": "men",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Aaron Fruge",
+          "school": "UC Riverside",
+          "mark": "7.58m",
+          "year": "JR-3",
+          "wind": "1.5",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Rahsaan Dozier",
+          "school": "Cal St. Fullerton",
+          "mark": "7.53m",
+          "year": "SR-4",
+          "wind": "3.3",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Kazu Kimura",
+          "school": "UC Riverside",
+          "mark": "7.48m",
+          "year": "SO-2",
+          "wind": "+0.0",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Steven Evans-Glynn",
+          "school": "Long Beach St.",
+          "mark": "7.42m",
+          "year": "FR-1",
+          "wind": "2.4",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Sebastian Ikolo",
+          "school": "Cal St. Fullerton",
+          "mark": "7.42m",
+          "year": "SO-2",
+          "wind": "2.3",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Jaden Rucker",
+          "school": "UC San Diego",
+          "mark": "7.35m",
+          "year": "SR-4",
+          "wind": "3.2",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Layne Buck",
+          "school": "CSUN",
+          "mark": "7.28m",
+          "year": "SR-4",
+          "wind": "0.8",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Hudson Shaver",
+          "school": "UC Santa Barbara",
+          "mark": "7.22m",
+          "year": "SO-2",
+          "wind": "0.5",
+          "points": 1
+        }
+      ]
+    },
+    "Women LJ": {
+      "short_name": "LJ",
+      "gender": "women",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Chandler Smith",
+          "school": "CSUN",
+          "mark": "6.08m",
+          "year": "SR-4",
+          "wind": "+0.0",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Kailah McKenzie",
+          "school": "UC Irvine",
+          "mark": "6.05m",
+          "year": "JR-3",
+          "wind": "1.8",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Tamara Aimufia",
+          "school": "UC San Diego",
+          "mark": "6.03m",
+          "year": "JR-3",
+          "wind": "+0.0",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Desie Armstrong",
+          "school": "Cal Poly",
+          "mark": "5.99m",
+          "year": "SR-4",
+          "wind": "0.5",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Jessica Mackenzie",
+          "school": "UC Santa Barbara",
+          "mark": "5.94m",
+          "year": "SR-4",
+          "wind": "0.7",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Kylee Davis",
+          "school": "UC Davis",
+          "mark": "5.94m",
+          "year": "JR-3",
+          "wind": "+0.0",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Tayhlore Hoagland",
+          "school": "Cal Poly",
+          "mark": "5.94m",
+          "year": "SO-2",
+          "wind": "1.7",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Melanie Ceballos",
+          "school": "UC Riverside",
+          "mark": "5.93m",
+          "year": "SR-4",
+          "wind": "1.3",
+          "points": 1
+        }
+      ]
+    },
+    "Men TJ": {
+      "short_name": "TJ",
+      "gender": "men",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Camren Smith",
+          "school": "Cal St. Fullerton",
+          "mark": "15.59m",
+          "year": "FR-1",
+          "wind": "0.8",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Marcus Harris",
+          "school": "UC San Diego",
+          "mark": "15.53m",
+          "year": "SO-2",
+          "wind": "0.2",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Jay Louison-Roe",
+          "school": "CSUN",
+          "mark": "15.34m",
+          "year": "SR-4",
+          "wind": "2.0",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Kenneth Tucker",
+          "school": "UC San Diego",
+          "mark": "15.32m",
+          "year": "SO-2",
+          "wind": "+0.0",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Kenechukwu Okonkwo",
+          "school": "UC Irvine",
+          "mark": "15.23m",
+          "year": "JR-3",
+          "wind": "1.7",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Jaden Rucker",
+          "school": "UC San Diego",
+          "mark": "15.10m",
+          "year": "SR-4",
+          "wind": "0.3",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Colin Green",
+          "school": "UC Irvine",
+          "mark": "14.92m",
+          "year": "FR-1",
+          "wind": "0.4",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Zeshaun Daley",
+          "school": "UC Riverside",
+          "mark": "14.78m",
+          "year": "FR-1",
+          "wind": "1.0",
+          "points": 1
+        }
+      ]
+    },
+    "Women TJ": {
+      "short_name": "TJ",
+      "gender": "women",
+      "category": "Jumps",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Chelsea Aninyei",
+          "school": "UC Riverside",
+          "mark": "12.85m",
+          "year": "JR-3",
+          "wind": "3.0",
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Kennedy Johnson",
+          "school": "UC Santa Barbara",
+          "mark": "12.73m",
+          "year": "SR-4",
+          "wind": "2.1",
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Tara Wyllie",
+          "school": "Hawaii",
+          "mark": "12.71m",
+          "year": "SR-4",
+          "wind": "-1.1",
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Tamara Aimufia",
+          "school": "UC San Diego",
+          "mark": "12.48m",
+          "year": "JR-3",
+          "wind": "0.8",
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Camryn Harris",
+          "school": "CSUN",
+          "mark": "12.47m",
+          "year": "SR-4",
+          "wind": "1.9",
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Chidiebere Agunanne",
+          "school": "UC San Diego",
+          "mark": "12.47m",
+          "year": "JR-3",
+          "wind": "+0.0",
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "KiiKii Brown",
+          "school": "Long Beach St.",
+          "mark": "12.46m",
+          "year": "FR-1",
+          "wind": "0.4",
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Kailah McKenzie",
+          "school": "UC Irvine",
+          "mark": "12.28m",
+          "year": "JR-3",
+          "wind": "1.4",
+          "points": 1
+        }
+      ]
+    },
+    "Men SP": {
+      "short_name": "SP",
+      "gender": "men",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Aiden Pastorian",
+          "school": "Cal Poly",
+          "mark": "18.49m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Hawkin Miller",
+          "school": "Cal St. Fullerton",
+          "mark": "18.42m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Zach Lewis",
+          "school": "UC San Diego",
+          "mark": "18.14m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Brayden Bitter",
+          "school": "Cal St. Fullerton",
+          "mark": "17.43m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Javier Toro",
+          "school": "CSU Bakersfield",
+          "mark": "17.31m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Cesar Salazar",
+          "school": "UC San Diego",
+          "mark": "17.20m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Kyriaun Davis",
+          "school": "CSUN",
+          "mark": "16.98m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Joseph Duggan",
+          "school": "UC Irvine",
+          "mark": "16.94m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women SP": {
+      "short_name": "SP",
+      "gender": "women",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Nyla Baker",
+          "school": "UC Irvine",
+          "mark": "15.78m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Feyi Olukanni",
+          "school": "UC San Diego",
+          "mark": "15.47m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Taylor Hofland",
+          "school": "Cal Poly",
+          "mark": "15.04m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Pinkie Schnayer",
+          "school": "UC Irvine",
+          "mark": "14.94m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Golda Demby",
+          "school": "Cal Poly",
+          "mark": "14.68m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Lilian Turban",
+          "school": "Hawaii",
+          "mark": "14.45m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Maya Ifo-Desai",
+          "school": "UC Davis",
+          "mark": "14.30m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Amani Britton",
+          "school": "CSUN",
+          "mark": "14.27m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men DT": {
+      "short_name": "DT",
+      "gender": "men",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Joseph Duggan",
+          "school": "UC Irvine",
+          "mark": "56.45m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Zach Lewis",
+          "school": "UC San Diego",
+          "mark": "55.25m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Kyriaun Davis",
+          "school": "CSUN",
+          "mark": "55.10m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Elijah Ignacio",
+          "school": "CSUN",
+          "mark": "54.11m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Isaiah Butler",
+          "school": "CSUN",
+          "mark": "53.54m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Jake Joerger",
+          "school": "UC Davis",
+          "mark": "51.09m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Chimobi Onye",
+          "school": "UC Irvine",
+          "mark": "50.38m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Judah Withey",
+          "school": "Cal St. Fullerton",
+          "mark": "49.52m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women DT": {
+      "short_name": "DT",
+      "gender": "women",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Katherine Shipp-Davis",
+          "school": "CSUN",
+          "mark": "52.41m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Nyla Baker",
+          "school": "UC Irvine",
+          "mark": "52.01m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Isabella Rigby",
+          "school": "Cal Poly",
+          "mark": "51.50m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Summer Mosley",
+          "school": "CSUN",
+          "mark": "51.47m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Samaria Vital",
+          "school": "Hawaii",
+          "mark": "50.97m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Dimitra Vitogiannis",
+          "school": "UC Santa Barbara",
+          "mark": "50.80m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Feyi Olukanni",
+          "school": "UC San Diego",
+          "mark": "49.90m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Amani Britton",
+          "school": "CSUN",
+          "mark": "48.94m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men HT": {
+      "short_name": "HT",
+      "gender": "men",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Travis Martin",
+          "school": "Cal Poly",
+          "mark": "73.82m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Javier Toro",
+          "school": "CSU Bakersfield",
+          "mark": "64.88m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Tylor Connelly",
+          "school": "CSUN",
+          "mark": "64.82m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Eman Goodloe",
+          "school": "Long Beach St.",
+          "mark": "63.71m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Tyler Knowles",
+          "school": "Long Beach St.",
+          "mark": "63.24m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Bryan Chang",
+          "school": "UC San Diego",
+          "mark": "59.65m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Adam Torres",
+          "school": "CSU Bakersfield",
+          "mark": "59.58m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Daniel Hartman",
+          "school": "CSU Bakersfield",
+          "mark": "58.80m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women HT": {
+      "short_name": "HT",
+      "gender": "women",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Giszelle Hrehor",
+          "school": "Long Beach St.",
+          "mark": "58.69m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Deana Davis",
+          "school": "UC Irvine",
+          "mark": "58.67m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Jocelyn Alexander",
+          "school": "Cal St. Fullerton",
+          "mark": "56.32m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Kayla Yap",
+          "school": "UC Santa Barbara",
+          "mark": "55.76m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Amanda Javellana",
+          "school": "Long Beach St.",
+          "mark": "55.10m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Golda Demby",
+          "school": "Cal Poly",
+          "mark": "55.09m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Abigail Gavrilovic",
+          "school": "Long Beach St.",
+          "mark": "54.69m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Cassidy Faulkner",
+          "school": "UC Santa Barbara",
+          "mark": "53.05m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men JT": {
+      "short_name": "JT",
+      "gender": "men",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Conrad Bernstein",
+          "school": "Cal Poly",
+          "mark": "69.84m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Lucas Scott",
+          "school": "Cal Poly",
+          "mark": "64.89m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Matthew Bender",
+          "school": "Long Beach St.",
+          "mark": "64.57m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Darrin Campbell",
+          "school": "UC Irvine",
+          "mark": "64.24m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Colby Neron",
+          "school": "Cal Poly",
+          "mark": "62.71m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "David Stingle",
+          "school": "CSUN",
+          "mark": "62.34m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Griffin Cole",
+          "school": "UC Irvine",
+          "mark": "61.17m",
+          "year": "FR-1",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Hudson Shaver",
+          "school": "UC Santa Barbara",
+          "mark": "60.77m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women JT": {
+      "short_name": "JT",
+      "gender": "women",
+      "category": "Throws",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Rori Denness-Lamont",
+          "school": "Long Beach St.",
+          "mark": "53.89m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Giselle Rodriguez",
+          "school": "UC Irvine",
+          "mark": "48.38m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Lilian Turban",
+          "school": "Hawaii",
+          "mark": "48.12m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Jessica Mackenzie",
+          "school": "UC Santa Barbara",
+          "mark": "47.36m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Madison Rust",
+          "school": "UC Santa Barbara",
+          "mark": "46.58m",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Camrenne Genilla",
+          "school": "Cal Poly",
+          "mark": "46.39m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Jolie Robinson",
+          "school": "UC Irvine",
+          "mark": "44.15m",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Kyra Miedecke",
+          "school": "Long Beach St.",
+          "mark": "43.68m",
+          "year": "JR-3",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Men Decathlon": {
+      "short_name": "Decathlon",
+      "gender": "men",
+      "category": "Multi",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Ryan Gregory",
+          "school": "Long Beach St.",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Hudson Shaver",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Keith Orona",
+          "school": "Cal St. Fullerton",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Braylon Noble",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Dominic Tubbs",
+          "school": "Cal St. Fullerton",
+          "mark": "",
+          "year": "FR-1",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Justin Reichenberg",
+          "school": "UC Davis",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Milo Orona",
+          "school": "Long Beach St.",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Sam Betz",
+          "school": "UC San Diego",
+          "mark": "",
+          "year": "JR-3",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    },
+    "Women Heptathlon": {
+      "short_name": "Heptathlon",
+      "gender": "women",
+      "category": "Multi",
+      "top8": [
+        {
+          "rank": 1,
+          "name": "Joy Anderson",
+          "school": "UC Irvine",
+          "mark": "",
+          "year": "FR-1",
+          "wind": null,
+          "points": 10
+        },
+        {
+          "rank": 2,
+          "name": "Jessica Mackenzie",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 8
+        },
+        {
+          "rank": 3,
+          "name": "Jazzmine Davis",
+          "school": "UC Irvine",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 6
+        },
+        {
+          "rank": 4,
+          "name": "Zharia Taylor",
+          "school": "UC Irvine",
+          "mark": "",
+          "year": "SR-4",
+          "wind": null,
+          "points": 5
+        },
+        {
+          "rank": 5,
+          "name": "Mayalee Osola",
+          "school": "Cal St. Fullerton",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 4
+        },
+        {
+          "rank": 6,
+          "name": "Isabella Vally",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 3
+        },
+        {
+          "rank": 7,
+          "name": "Johanna Barmettler",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 2
+        },
+        {
+          "rank": 8,
+          "name": "Madison Rust",
+          "school": "UC Santa Barbara",
+          "mark": "",
+          "year": "SO-2",
+          "wind": null,
+          "points": 1
+        }
+      ]
+    }
+  },
+  "school_colors": {
+    "Cal Poly": "#154734",
+    "Cal St. Fullerton": "#FF6600",
+    "CSUN": "#CC0000",
+    "CSU Bakersfield": "#00205B",
+    "Long Beach St.": "#222222",
+    "UC Davis": "#022851",
+    "UC Irvine": "#0064A4",
+    "UC Riverside": "#003DA5",
+    "UC San Diego": "#182B49",
+    "UC Santa Barbara": "#003660",
+    "Hawaii": "#024731"
+  }
+};
+let gender = 'combined', category = 'All', teamFilter = null;
+
+const initials = {
+  'Cal Poly':'CP','Cal St. Fullerton':'CSF','CSUN':'CSUN','CSU Bakersfield':'CSUB',
+  'Long Beach St.':'LBS','UC Davis':'UCD','UC Irvine':'UCI','UC Riverside':'UCR',
+  'UC San Diego':'UCSD','UC Santa Barbara':'UCSB','Hawaii':'HAW'
+};
+
+function medal(r){return r===1?'🥇':r===2?'🥈':r===3?'🥉':null}
+
+function counter(el, target, ms=1100){
+  let s=null;
+  (function step(ts){
+    if(!s)s=ts;
+    const p=Math.min((ts-s)/ms,1), e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*e);
+    if(p<1)requestAnimationFrame(step);
+  })(performance.now());
+}
+
+function spawnParticles(){
+  const c=document.getElementById('pts');
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');
+    p.className='pt';
+    const sz=Math.random()*4+2;
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*12}s`;
+    c.appendChild(p);
+  }
+}
+
+function pillBg(){
+  const active=document.querySelector('.pill.active');
+  const bg=document.getElementById('pillBg');
+  if(!active)return;
+  bg.style.left=active.offsetLeft+'px';
+  bg.style.width=active.offsetWidth+'px';
+}
+
+function renderLB(){
+  const grid=document.getElementById('lbGrid');
+  grid.innerHTML='';
+  DATA.team_scores[gender].forEach((item,i)=>{
+    const r=i+1, m=medal(r), color=DATA.school_colors[item.school]||'#333';
+    const card=document.createElement('div');
+    card.className='lb-card';
+    card.dataset.school=item.school;
+    card.innerHTML=`
+      ${m?`<div class="lb-medal">${m}</div>`:`<div class="lb-rank">${r}</div>`}
+      <div class="lb-avatar" style="background:${color}">${initials[item.school]||item.school.slice(0,3)}</div>
+      <div class="lb-info">
+        <div class="lb-school">${item.school}</div>
+        <div class="lb-pts-label">points</div>
+      </div>
+      <div class="lb-score${r===1?' big':''}" data-t="${item.points}">0</div>`;
+    if(teamFilter===item.school)card.classList.add('active');
+    card.addEventListener('click',()=>{
+      if(teamFilter===item.school){teamFilter=null;card.classList.remove('active');}
+      else{document.querySelectorAll('.lb-card').forEach(c=>c.classList.remove('active'));teamFilter=item.school;card.classList.add('active');}
+      renderEvents();
+    });
+    grid.appendChild(card);
+    setTimeout(()=>{
+      card.classList.add('anim');
+      counter(card.querySelector('.lb-score'),item.points,900+i*60);
+    },i*55);
+  });
+}
+
+function renderChips(){
+  const c=document.getElementById('chips');
+  ['All','Sprints','Distance','Hurdles','Relays','Jumps','Throws','Multi'].forEach(cat=>{
+    const chip=document.createElement('button');
+    chip.className='chip'+(cat===category?' active':'');
+    chip.textContent=cat;
+    chip.addEventListener('click',()=>{
+      category=cat;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderEvents();
+    });
+    c.appendChild(chip);
+  });
+}
+
+function renderEvents(){
+  const grid=document.getElementById('evGrid');
+  grid.innerHTML='';
+  let n=0;
+  Object.entries(DATA.events).forEach(([key,ev])=>{
+    if(gender!=='combined'&&ev.gender!==gender)return;
+    if(category!=='All'&&ev.category!==category)return;
+    if(teamFilter&&!ev.top8.some(a=>a.school===teamFilter))return;
+
+    const card=document.createElement('div');
+    card.className='ev-card';
+    const gLabel=ev.gender==='men'?'Men':'Women';
+    const gClass=ev.gender==='men'?'g-m':'g-f';
+
+    const prevRows=ev.top8.slice(0,3).map(a=>{
+      const d=teamFilter&&a.school!==teamFilter?' class="prev-row dimmed"':' class="prev-row"';
+      return `<div${d}><span class="prev-rk">${a.rank}</span><span class="prev-name">${a.name}</span><span class="prev-school">${a.school}</span><span class="prev-mark">${a.mark}</span><span class="prev-pts">${a.points}</span></div>`;
+    }).join('');
+
+    const tblRows=ev.top8.map(a=>{
+      const d=teamFilter&&a.school!==teamFilter?' class="dimmed"':'';
+      const w=a.wind?` <small style="color:var(--text-3)">${a.wind}</small>`:'';
+      return `<tr${d}><td>${a.rank}</td><td>${a.name}</td><td style="color:var(--text-2)">${a.year||''}</td><td style="color:var(--text-2)">${a.school}</td><td style="font-weight:600">${a.mark}${w}</td><td><span class="pts-cell">${a.points}</span></td></tr>`;
+    }).join('');
+
+    card.innerHTML=`
+      <div class="ev-head">
+        <div class="ev-name-wrap">
+          <span class="g-badge ${gClass}">${gLabel}</span>
+          <span class="ev-name">${ev.short_name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="ev-cat">${ev.category}</span>
+          <span class="ev-chevron">&#9660;</span>
+        </div>
+      </div>
+      <div class="ev-preview">${prevRows||'<p style="padding:8px 0;color:var(--text-3);font-size:13px">No Big West athletes ranked</p>'}</div>
+      <div class="ev-tbl-wrap">
+        <table class="rt"><thead><tr><th>#</th><th>Athlete</th><th>Yr</th><th>School</th><th>Mark</th><th>Pts</th></tr></thead>
+        <tbody>${tblRows}</tbody></table>
+      </div>`;
+
+    card.querySelector('.ev-head').addEventListener('click',()=>card.classList.toggle('open'));
+    grid.appendChild(card);
+
+    const delay=n*25;
+    setTimeout(()=>{
+      const obs=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);}});
+      },{threshold:.05});
+      obs.observe(card);
+    },delay);
+    n++;
+  });
+
+  if(!n){
+    grid.innerHTML=`<div class="empty"><div class="icon">🏃</div><p>No events match the current filters.</p></div>`;
+  }
+}
+
+document.querySelectorAll('.pill').forEach(p=>{
+  p.addEventListener('click',()=>{
+    document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    gender=p.dataset.g;
+    pillBg();
+    teamFilter=null;
+    renderLB();
+    renderEvents();
+  });
+});
+
+spawnParticles();
+renderChips();
+renderLB();
+renderEvents();
+requestAnimationFrame(pillBg);
+</script>
+</body>
+</html>

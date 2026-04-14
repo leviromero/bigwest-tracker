@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.nodeenv/
+deploy/
+.claude/
+*.egg-info/
+.env
