@@ -145,7 +145,7 @@ def fetch_event(event_type: str, gender: str, limit: int = 50) -> str:
         "Turbo-Frame": "list_data",
     }
     params = {"event_type": event_type, "gender": gender, "limit": str(limit)}
-    resp = requests.get(BASE_URL, params=params, headers=headers, timeout=30)
+    resp = requests.get(BASE_URL, params=params, headers=headers, timeout=15)
     resp.raise_for_status()
     return resp.text
 
@@ -212,7 +212,7 @@ def fetch_all_events(log=print) -> dict:
                 }
         except Exception as e:
             log(f"    ERROR: {e}")
-        time.sleep(0.3)
+        time.sleep(0.15)
 
     return all_events
 

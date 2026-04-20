@@ -5,6 +5,7 @@ Auto-refreshes TFRRS data every 6 hours.
 
 import json
 import logging
+import os
 import threading
 from datetime import datetime, timezone
 
@@ -26,6 +27,29 @@ _cache = {
 _lock = threading.Lock()
 
 REFRESH_HOURS = 6
+CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_cache.json")
+
+
+def load_seed_data():
+    """Load pre-baked data so the first page load is instant."""
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r") as f:
+                data = json.load(f)
+            log.info(f"Loaded seed data from {CACHE_FILE} ({len(data.get('events', {}))} events)")
+            return data
+        except Exception as e:
+            log.warning(f"Could not load seed data: {e}")
+    return None
+
+
+def save_cache(data):
+    """Persist latest scrape to disk so restarts are fast."""
+    try:
+        with open(CACHE_FILE, "w") as f:
+            json.dump(data, f)
+    except Exception:
+        pass
 
 
 def refresh_data():
@@ -44,6 +68,7 @@ def refresh_data():
             _cache["data"] = data
             _cache["updated_at"] = now.isoformat()
             _cache["refreshing"] = False
+        save_cache(data)
         log.info(f"Data refreshed at {now.isoformat()} — {len(data['events'])} events")
     except Exception as e:
         log.error(f"Refresh failed: {e}")
@@ -51,12 +76,17 @@ def refresh_data():
             _cache["refreshing"] = False
 
 
-# ── Scheduler ──
+# ── Load seed data immediately, then schedule live refreshes ──
+seed = load_seed_data()
+if seed:
+    _cache["data"] = seed
+    _cache["updated_at"] = datetime.now(timezone.utc).isoformat()
+
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.add_job(refresh_data, "interval", hours=REFRESH_HOURS, id="refresh")
 scheduler.start()
 
-# Initial load in background thread so the app starts fast
+# Kick off a background refresh so data gets updated from TFRRS soon
 threading.Thread(target=refresh_data, daemon=True).start()
 
 
